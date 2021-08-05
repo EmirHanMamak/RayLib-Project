@@ -15,14 +15,14 @@
                 "command": "C:/raylib/mingw/bin/mingw32-make.exe",
                 "args": [
                     "RAYLIB_PATH=C:/raylib/raylib",
-                    "PROJECT_NAME=${fileBasenameNoExtension}",
+                    "PROJECT_NAME=main",
                     "OBJS=*.cpp",
                     "BUILD_MODE=DEBUG"
                 ],
             },
             "osx": {
                 "args": [
-                    "PROJECT_NAME=${fileBasenameNoExtension}",
+                    "PROJECT_NAME=main",
                     "OBJS=*.cpp",
                     "BUILD_MODE=DEBUG"
                 ],
@@ -46,13 +46,13 @@
                 "command": "C:/raylib/mingw/bin/mingw32-make.exe",
                 "args": [
                     "RAYLIB_PATH=C:/raylib/raylib",
-                    "PROJECT_NAME=${fileBasenameNoExtension}",
+                    "PROJECT_NAME=main",
                     "OBJS=*.cpp"
                 ],
             },
             "osx": {
                 "args": [
-                    "PROJECT_NAME=${fileBasenameNoExtension}",
+                    "PROJECT_NAME=main",
                     "OBJS=*.cpp"
                 ],
             },
@@ -60,29 +60,6 @@
             "problemMatcher": [
                 "$gcc"
             ]
-        },
-        {
-            "type": "cppbuild",
-            "label": "C/C++: g++.exe build active file",
-            "command": "C:\\raylib\\mingw\\bin\\g++.exe",
-            "args": [
-                "-g",
-                "${workspaceFolder}\\*.cpp",
-                "${file}",
-                "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
-            ],
-            "options": {
-                "cwd": "C:\\raylib\\mingw\\bin"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "detail": "compiler: C:\\raylib\\mingw\\bin\\g++.exe"
         }
     ]
 }
