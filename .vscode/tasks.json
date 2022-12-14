@@ -37,10 +37,7 @@
                     "BUILD_MODE=DEBUG"
                 ]
             },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": [
                 "$gcc"
             ]
@@ -80,7 +77,7 @@
             ],
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             },
             "detail": "compiler: C:\\raylib\\w64devkit\\bin\\g++.exe"
         }
