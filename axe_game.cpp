@@ -4,7 +4,7 @@ int main ()  {
     //windows dimension
     int width {1280}, height {720};
     InitWindow(width, height, "Mamak");
-    //circle coordinates
+    //circle coordinates .
     int circle_x {GetScreenWidth()/2}, circle_y = {GetScreenHeight()/2};
     int escape;
 
