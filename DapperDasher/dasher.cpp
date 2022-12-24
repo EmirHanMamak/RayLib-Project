@@ -8,16 +8,13 @@ struct AnimData
     float updateTime;
     float runningTime;
 };
-
+bool isOnGround(AnimData data, int windowDimensions);
+AnimData updateAnimData(AnimData data, float deltaTime, int maxFrame);
 int main()
 {
-    const int windowWidth = 800, windowHeight = 400;
+    int windowDimensions[2] {{512},{380}};
     // int rectangle_radius = 50;
-    InitWindow(windowWidth, windowHeight, "Mamak Dasher");
-    // Scrafy Frame
-    int frame{};
-    const float updateTime{1.0f / 12.0f};
-    float runningTime{};
+    InitWindow(windowDimensions[0], windowDimensions[1], "Mamak Dasher");
     // SCARFY
     Texture2D scrafy = LoadTexture("textures/scarfy.png");
     AnimData scrafyData;
@@ -25,50 +22,32 @@ int main()
     scrafyData.rec.height = scrafy.height;
     scrafyData.rec.x = 0.0;
     scrafyData.rec.y = 0.0;
-    scrafyData.pos.x = windowWidth / 2 - (scrafyData.rec.width / 2);
-    scrafyData.pos.y = windowHeight - scrafyData.rec.height;
+    scrafyData.pos.x = windowDimensions[0] / 2 - (scrafyData.rec.width / 2);
+    scrafyData.pos.y = windowDimensions[1] - scrafyData.rec.height;
     scrafyData.frame = 0;
     scrafyData.updateTime = 1.0f / 12.0f;
     scrafyData.runningTime = 0.0f;
 
-    /*Rectangle scarfyRec;
-    scarfyRec.width = scrafy.width / 6;
-    scarfyRec.height = scrafy.height;
-    scarfyRec.x = scrafy.width / 6 * 0;
-    scarfyRec.y = 0;
-    Vector2 scrafyPos;
-    scrafyPos.x = windowWidth / 2 - (scarfyRec.width / 2);
-    scrafyPos.y = windowHeight - scrafy.height;
-
-    // Scrafy Frame
-    int nebFrame{};
-    const float nebUpdateTime{1.0f / 12.0f};
-    float nebRunningTime{};*/
-
     // Nebula
     Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
-    
-    AnimData nebuladata {
-        {0.0, 0.0, nebula.width / 8, nebula.height / 8}, //nebula rec
-        {windowWidth + nebula.width / 8, windowHeight - nebula.height/ 8}, //nebula pos
-        0, //nebula frame
-        1.0f / 12.0f, //nebula updatetime
-        0.0f //nebula runningtime
-    };
-    
-        AnimData nebuladata2 {
-        {0.0, 0.0, nebula.width / 8, nebula.height / 8}, //nebula2 rec
-        {windowWidth + nebula.width / 8 + 300 , windowHeight - nebula.height/ 8}, //nebula2 pos
-        0, //nebula2 frame
-        1.0f / 12.0f, //nebula2 updatetime
-        0.0f //nebula2 runningtime
-    };
-    int nebVel{-4};
-    /*Rectangle nebRec{0.0, 0.0, nebula.width / 8, nebula.height / 8};
-    // Nebula Location on the canvas
-    Vector2 nebPos{windowWidth + nebRec.width, windowHeight - nebRec.height};
-    */
+    const int sizeOfNebulae {3};
+        AnimData nabulae[sizeOfNebulae]{};
+        for(int i = 0 ; i < sizeOfNebulae ; i++) {
+            //nebula same rectangels
+            nabulae[i].rec.x = 0;
+            nabulae[i].rec.y = 0;
+            nabulae[i].rec.width = nebula.width / 8;
+            nabulae[i].rec.height = nebula.height / 8;
+            //nebula pos
+            nabulae[i].pos.y = windowDimensions[1] - nebula.height/ 8;
+            nabulae[i].frame = 0;
+            nabulae[i].runningTime = 0.0f;
+            nabulae[i].updateTime = 1.0f / 12.0f;
+            nabulae[i].pos.x = windowDimensions[0] + nebula.width / 8 + i * 300;
+
+        }
     // Variables
+    int nebVel{-4};
     // Gravity (pixel/s) /s
     const int gravity{1'000};
 
@@ -86,7 +65,7 @@ int main()
         BeginDrawing();
         ClearBackground(WHITE);
         // logical math
-        if (scrafyData.pos.y >= windowHeight - scrafyData.rec.height)
+        if (isOnGround(scrafyData, windowDimensions[1]))
         {
             velocity = 0;
             isOnAir = false;
@@ -102,7 +81,6 @@ int main()
         if (IsKeyPressed(KEY_SPACE) && !isOnAir)
         {
             velocity += jumpVel;
-            scrafyData.rec.x = scrafy.width / 6 * 2;
         }
 
         // UPDATE POSITION
@@ -111,43 +89,48 @@ int main()
         // Scarfy ANIMATION UPDATE
         if (!isOnAir)
         {
-            runningTime += dT;
-            if (runningTime >= updateTime)
-            {
-                runningTime = 0.0f;
-                // Frame Check
-                scrafyData.rec.x = frame * scrafyData.rec.width;
-                frame++;
-                if (frame > 5)
-                {
-                    frame = 0;
-                }
-            }
+            scrafyData = updateAnimData(scrafyData, dT, 5);
         }
 
         // NEBULA ANIMATION UPDATE
-        nebuladata.runningTime += dT;
-
-        if(nebuladata.runningTime >= nebuladata.updateTime) {
-            nebuladata.runningTime = 0.0f;
-            nebuladata.rec.x = nebuladata.frame * nebuladata.rec.width;
-            nebuladata.frame++;
-            if(nebuladata.frame > 7) {
-                nebuladata.frame = 0;
-
-            }
+        for(int i = 0; i < sizeOfNebulae; i++) {
+            nabulae[i] = updateAnimData(nabulae[i], dT, 8);
+            nabulae[i].pos.x += nebVel;
         }
-        nebuladata.pos.x += nebVel;
-        if(nebuladata.pos.x + nebuladata.rec.width < 0) {
-            nebuladata.pos.x = windowWidth + nebuladata.rec.width;
-        }
+
+
         // logical math end
-        //  DrawRectangle(rectanglePosX, rectanglePosY, rectangle_radius, rectangle_radius, RED);
+        //DRAWING OBJECTS
         DrawTextureRec(scrafy, scrafyData.rec, scrafyData.pos, WHITE);
-        DrawTextureRec(nebula, nebuladata.rec, nebuladata.pos, WHITE);
+        for(int i = 0 ; i < sizeOfNebulae ; i++) {
+             DrawTextureRec(nebula, nabulae[i].rec, nabulae[i].pos, WHITE);
+        }
+        //END OF DRAWING
         EndDrawing();
     }
+    //UNLOAD TEXTURES
     UnloadTexture(scrafy);
     UnloadTexture(nebula);
+    //CLOSE WINDOW
     CloseWindow();
+}
+
+
+//IS ON GROUND CHECK
+bool isOnGround(AnimData data, int windowDimensions) {
+    return data.pos.y >= windowDimensions - data.rec.height;
+
+}
+//Animation UPDATE
+AnimData updateAnimData(AnimData data, float deltaTime, int maxFrame) {
+    data.runningTime += deltaTime;
+    if(data.runningTime >= data.updateTime) {
+        data.runningTime = 0.0f;
+        data.rec.x = data.frame * data.rec.width;
+        data.frame++;
+        if(data.frame > maxFrame) {
+            data.frame = 0;
+        }
+    }
+    return data;
 }
