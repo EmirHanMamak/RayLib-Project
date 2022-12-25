@@ -15,20 +15,8 @@ int main()
     int windowDimensions[2] {{512},{380}};
     // int rectangle_radius = 50;
     InitWindow(windowDimensions[0], windowDimensions[1], "Mamak Dasher");
-    // SCARFY
-    Texture2D scrafy = LoadTexture("textures/scarfy.png");
-    AnimData scrafyData;
-    scrafyData.rec.width = scrafy.width / 6;
-    scrafyData.rec.height = scrafy.height;
-    scrafyData.rec.x = 0.0;
-    scrafyData.rec.y = 0.0;
-    scrafyData.pos.x = windowDimensions[0] / 2 - (scrafyData.rec.width / 2);
-    scrafyData.pos.y = windowDimensions[1] - scrafyData.rec.height;
-    scrafyData.frame = 0;
-    scrafyData.updateTime = 1.0f / 12.0f;
-    scrafyData.runningTime = 0.0f;
 
-    // Nebula
+    // Nebula DATA
     Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
     const int sizeOfNebulae {3};
         AnimData nabulae[sizeOfNebulae]{};
@@ -46,8 +34,29 @@ int main()
             nabulae[i].pos.x = windowDimensions[0] + nebula.width / 8 + i * 300;
 
         }
+            // SCARFY DATA
+    Texture2D scrafy = LoadTexture("textures/scarfy.png");
+    AnimData scrafyData;
+    scrafyData.rec.width = scrafy.width / 6;
+    scrafyData.rec.height = scrafy.height;
+    scrafyData.rec.x = 0.0;
+    scrafyData.rec.y = 0.0;
+    scrafyData.pos.x = windowDimensions[0] / 2 - (scrafyData.rec.width / 2);
+    scrafyData.pos.y = windowDimensions[1] - scrafyData.rec.height;
+    scrafyData.frame = 0;
+    scrafyData.updateTime = 1.0f / 12.0f;
+    scrafyData.runningTime = 0.0f;
+        //finishline
+        float finishLine {nabulae[sizeOfNebulae - 1].pos.x + 10};
+        // BACKGROUND DATA
+        Texture2D backGround = LoadTexture("textures/far-buildings.png");
+        float bgX {};
+        Texture2D foreGround = LoadTexture("textures/foreground.png");
+        float fgX {};
+        Texture2D midGround = LoadTexture("textures/back-buildings.png");
+        float mgX {};
     // Variables
-    int nebVel{-4};
+    int nebVel{-200};
     // Gravity (pixel/s) /s
     const int gravity{1'000};
 
@@ -57,6 +66,8 @@ int main()
     int velocity{60};
     // IsOnAir
     bool isOnAir{};
+    //collisions
+    bool collision {};
     SetTargetFPS(60);
     while (!WindowShouldClose())
     {
@@ -64,6 +75,20 @@ int main()
         float dT{GetFrameTime()};
         BeginDrawing();
         ClearBackground(WHITE);
+        //background positions
+        bgX -= 80 * dT;
+        Vector2 bg1Pos {bgX, 0.0f};
+        Vector2 bg2Pos {bgX + backGround.width * 2, 0.0f};
+
+        //foreground positions
+        fgX -= 80 *dT;
+        Vector2 fg1Pos {fgX, 0.0f};
+        Vector2 fg2Pos {fgX + foreGround.width * 2, 0.0f};
+        
+        //midground positions
+        mgX -= 80 *dT;
+        Vector2 mg1Pos {mgX, 0.0f};
+        Vector2 mg2Pos {mgX + midGround.width * 2, 0.0f};
         // logical math
         if (isOnGround(scrafyData, windowDimensions[1]))
         {
@@ -85,7 +110,7 @@ int main()
 
         // UPDATE POSITION
         scrafyData.pos.y += velocity * dT;
-
+        finishLine += nebVel *dT;
         // Scarfy ANIMATION UPDATE
         if (!isOnAir)
         {
@@ -95,15 +120,69 @@ int main()
         // NEBULA ANIMATION UPDATE
         for(int i = 0; i < sizeOfNebulae; i++) {
             nabulae[i] = updateAnimData(nabulae[i], dT, 8);
-            nabulae[i].pos.x += nebVel;
+            nabulae[i].pos.x += nebVel* dT;
         }
 
+        //update finihline
 
         // logical math end
         //DRAWING OBJECTS
-        DrawTextureRec(scrafy, scrafyData.rec, scrafyData.pos, WHITE);
+
+        //draw background
+        if(bgX <= -backGround.width * 2 + 1) {
+            bgX = 0.0f;
+        }
+        DrawTextureEx(backGround, bg1Pos, 0.0f, 2.0f, WHITE);
+        DrawTextureEx(backGround, bg2Pos, 0.0f, 2.0f, WHITE);
+
+        //draw midGround
+        if(mgX <= -midGround.width * 2 + 1) {
+            mgX = 0.0f;
+        }
+        DrawTextureEx(midGround, mg1Pos, 0.0f, 2.0f, WHITE);
+        DrawTextureEx(midGround, mg2Pos, 0.0f, 2.0f, WHITE);
+
+        //draw foreGround
+        if(fgX <= -foreGround.width * 2 + 1) {
+            fgX = 0.0f;
+        }
+        DrawTextureEx(foreGround, fg1Pos, 0.0f, 2.0f, WHITE);
+        DrawTextureEx(foreGround, fg2Pos, 0.0f, 2.0f, WHITE);
+        //draw nebulaes 
         for(int i = 0 ; i < sizeOfNebulae ; i++) {
              DrawTextureRec(nebula, nabulae[i].rec, nabulae[i].pos, WHITE);
+        }
+
+        for(AnimData nebulas : nabulae) {
+            int pad {20};
+            Rectangle nebRec {
+                nebulas.pos.x + 2* pad ,
+                nebulas.pos.y + pad,
+                nebulas.rec.width - 5 * pad,
+                nebulas.rec.height -5 * pad
+            
+            };            
+            Rectangle scarfyRec {
+                //no need make collision box smaller cause of image already dosn't have padding
+                scrafyData.pos.x,
+                scrafyData.pos.y,
+                scrafyData.rec.width,
+                scrafyData.rec.height
+
+            };
+            if(CheckCollisionRecs(nebRec, scarfyRec)) {
+                collision = true;
+            }
+        }
+        if(collision) {
+            DrawText("Game Over", windowDimensions[0] / 2 - 50,windowDimensions[1] / 2, 30,RED);
+        }
+        else if(scrafyData.pos.x >= finishLine){
+            DrawText("YOU WIN", windowDimensions[0] / 2 - 50,windowDimensions[1] / 2, 30,YELLOW);
+            }
+        else {
+        //draw scarfy
+        DrawTextureRec(scrafy, scrafyData.rec, scrafyData.pos, WHITE);
         }
         //END OF DRAWING
         EndDrawing();
@@ -111,6 +190,9 @@ int main()
     //UNLOAD TEXTURES
     UnloadTexture(scrafy);
     UnloadTexture(nebula);
+    UnloadTexture(backGround);
+    UnloadTexture(foreGround);
+    UnloadTexture(midGround);
     //CLOSE WINDOW
     CloseWindow();
 }
